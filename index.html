@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LOGIN // PLAYER ONE</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap');
+
+    :root {
+      --neon-purple: #bf00ff;
+      --neon-cyan: #00f5ff;
+      --neon-pink: #ff006e;
+      --neon-green: #39ff14;
+      --bg-dark: #0a0a0f;
+      --bg-card: rgba(255,255,255,0.04);
+      --border: rgba(191,0,255,0.3);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg-dark);
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      color: #fff;
+    }
+
+    /* Animated grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(191,0,255,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(191,0,255,0.07) 1px, transparent 1px);
+      background-size: 40px 40px;
+      animation: gridMove 20s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes gridMove {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(40px); }
+    }
+
+    /* Floating orbs */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.25;
+      z-index: 0;
+      animation: float 8s ease-in-out infinite;
+    }
+    .orb-1 { width: 400px; height: 400px; background: var(--neon-purple); top: -100px; left: -100px; animation-delay: 0s; }
+    .orb-2 { width: 350px; height: 350px; background: var(--neon-cyan); bottom: -80px; right: -80px; animation-delay: -4s; }
+    .orb-3 { width: 200px; height: 200px; background: var(--neon-pink); top: 50%; left: 50%; animation-delay: -2s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50%       { transform: translateY(-30px) scale(1.05); }
+    }
+
+    /* Card */
+    .card {
+      position: relative;
+      z-index: 10;
+      width: min(420px, 92vw);
+      background: var(--bg-card);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px 36px;
+      box-shadow: 0 0 60px rgba(191,0,255,0.15), inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    /* XP bar at top */
+    .xp-bar-wrap {
+      margin-bottom: 28px;
+    }
+    .xp-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      font-family: 'Orbitron', monospace;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .xp-bar {
+      height: 4px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .xp-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--neon-purple), var(--neon-cyan));
+      border-radius: 99px;
+      transition: width 0.6s cubic-bezier(.4,0,.2,1);
+      box-shadow: 0 0 8px var(--neon-cyan);
+    }
+
+    /* Header */
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+    .pixel-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 0 16px rgba(191,0,255,0.5);
+      animation: pulse-icon 2s ease-in-out infinite;
+    }
+    @keyframes pulse-icon {
+      0%, 100% { box-shadow: 0 0 16px rgba(191,0,255,0.5); }
+      50%       { box-shadow: 0 0 28px rgba(191,0,255,0.9); }
+    }
+    .title {
+      font-family: 'Orbitron', monospace;
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      background: linear-gradient(90deg, #fff 30%, var(--neon-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      font-size: 12px;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 28px;
+      letter-spacing: 0.04em;
+    }
+
+    /* Achievement toast */
+    .achievement {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 100;
+      background: rgba(10,10,15,0.95);
+      border: 1px solid var(--neon-green);
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      box-shadow: 0 0 20px rgba(57,255,20,0.3);
+      transform: translateX(120%);
+      transition: transform 0.4s cubic-bezier(.34,1.56,.64,1);
+      max-width: 280px;
+    }
+    .achievement.show { transform: translateX(0); }
+    .achievement-icon { font-size: 22px; }
+    .achievement-text strong { display: block; color: var(--neon-green); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; font-family: 'Orbitron', monospace; }
+    .achievement-text span { color: rgba(255,255,255,0.7); font-size: 12px; }
+
+    /* Floating XP pop */
+    .xp-pop {
+      position: fixed;
+      font-family: 'Orbitron', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--neon-cyan);
+      text-shadow: 0 0 8px var(--neon-cyan);
+      pointer-events: none;
+      z-index: 200;
+      animation: xpFloat 1.2s ease-out forwards;
+    }
+    @keyframes xpFloat {
+      0%   { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-60px) scale(1.3); }
+    }
+
+    /* Form */
+    .field {
+      margin-bottom: 16px;
+    }
+    .field label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-family: 'Orbitron', monospace;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 8px;
+    }
+    .field label .field-status {
+      color: var(--neon-green);
+      font-size: 10px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .field label .field-status.visible { opacity: 1; }
+
+    .input-wrap {
+      position: relative;
+    }
+    .input-wrap input {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 13px 44px 13px 16px;
+      color: #fff;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+    }
+    .input-wrap input::placeholder { color: rgba(255,255,255,0.2); }
+    .input-wrap input:focus {
+      border-color: var(--neon-purple);
+      box-shadow: 0 0 0 3px rgba(191,0,255,0.15), 0 0 16px rgba(191,0,255,0.1);
+      background: rgba(191,0,255,0.06);
+    }
+    .input-wrap input.valid {
+      border-color: var(--neon-green);
+      box-shadow: 0 0 0 3px rgba(57,255,20,0.1);
+    }
+    .input-icon {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      pointer-events: none;
+      opacity: 0.4;
+      transition: opacity 0.3s;
+    }
+    .input-wrap input:focus ~ .input-icon { opacity: 0.9; }
+
+    /* Password strength */
+    .strength-bar {
+      display: flex;
+      gap: 4px;
+      margin-top: 8px;
+      height: 3px;
+    }
+    .strength-bar span {
+      flex: 1;
+      border-radius: 99px;
+      background: rgba(255,255,255,0.1);
+      transition: background 0.3s;
+    }
+    .strength-bar span.active-1 { background: var(--neon-pink); }
+    .strength-bar span.active-2 { background: #ffaa00; }
+    .strength-bar span.active-3 { background: var(--neon-green); }
+    .strength-label {
+      font-size: 10px;
+      margin-top: 5px;
+      font-family: 'Orbitron', monospace;
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.35);
+      transition: color 0.3s;
+      min-height: 14px;
+    }
+
+    /* Checkbox */
+    .remember-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .remember-row input[type=checkbox] { display: none; }
+    .custom-check {
+      width: 18px;
+      height: 18px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 5px;
+      background: rgba(255,255,255,0.04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s;
+      flex-shrink: 0;
+    }
+    .remember-row input:checked ~ .custom-check {
+      background: var(--neon-purple);
+      border-color: var(--neon-purple);
+      box-shadow: 0 0 10px rgba(191,0,255,0.5);
+    }
+    .check-mark { font-size: 11px; opacity: 0; transition: opacity 0.2s; }
+    .remember-row input:checked ~ .custom-check .check-mark { opacity: 1; }
+    .remember-text { font-size: 13px; color: rgba(255,255,255,0.5); }
+
+    /* CTA button */
+    .btn-login {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--neon-purple) 0%, var(--neon-pink) 100%);
+      color: #fff;
+      font-family: 'Orbitron', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s, box-shadow 0.3s;
+      box-shadow: 0 4px 24px rgba(191,0,255,0.4);
+    }
+    .btn-login:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(191,0,255,0.6);
+    }
+    .btn-login:active { transform: translateY(0); }
+    .btn-login::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transition: left 0.5s;
+    }
+    .btn-login:hover::before { left: 100%; }
+    .btn-login.loading { pointer-events: none; }
+    .btn-text { transition: opacity 0.2s; }
+    .btn-loader {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .btn-login.loading .btn-text { opacity: 0; }
+    .btn-login.loading .btn-loader { opacity: 1; }
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+      color: rgba(255,255,255,0.2);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      font-family: 'Orbitron', monospace;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+
+    /* Social buttons */
+    .social-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .btn-social {
+      flex: 1;
+      padding: 11px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      color: rgba(255,255,255,0.7);
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all 0.25s;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-social:hover {
+      background: rgba(255,255,255,0.09);
+      border-color: rgba(255,255,255,0.25);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    /* Footer */
+    .footer-text {
+      text-align: center;
+      font-size: 12.5px;
+      color: rgba(255,255,255,0.35);
+    }
+    .footer-text a {
+      color: var(--neon-cyan);
+      text-decoration: none;
+      font-weight: 600;
+      transition: text-shadow 0.2s;
+    }
+    .footer-text a:hover { text-shadow: 0 0 12px var(--neon-cyan); }
+
+    /* Stats strip */
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .stat {
+      text-align: center;
+      flex: 1;
+    }
+    .stat-val {
+      font-family: 'Orbitron', monospace;
+      font-size: 16px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .stat-key {
+      font-size: 9px;
+      color: rgba(255,255,255,0.25);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 2px;
+      font-family: 'Orbitron', monospace;
+    }
+
+    /* Particles */
+    .particles { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+    .particle {
+      position: absolute;
+      width: 2px; height: 2px;
+      background: var(--neon-cyan);
+      border-radius: 50%;
+      opacity: 0;
+      animation: particleFly linear infinite;
+    }
+    @keyframes particleFly {
+      0%   { opacity: 0; transform: translateY(0) scale(0); }
+      10%  { opacity: 0.8; }
+      90%  { opacity: 0.3; }
+      100% { opacity: 0; transform: translateY(-120vh) scale(1); }
+    }
+
+    /* Glitch on title hover */
+    .title:hover {
+      animation: glitch 0.3s ease;
+    }
+    @keyframes glitch {
+      0%  { transform: translate(0); }
+      20% { transform: translate(-2px, 1px); filter: hue-rotate(90deg); }
+      40% { transform: translate(2px, -1px); filter: hue-rotate(-90deg); }
+      60% { transform: translate(-1px, 2px); }
+      80% { transform: translate(1px, -1px); }
+      100%{ transform: translate(0); filter: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="particles" id="particles"></div>
+
+  <!-- Achievement toast -->
+  <div class="achievement" id="achievement">
+    <div class="achievement-icon" id="achIcon">🏆</div>
+    <div class="achievement-text">
+      <strong>Achievement Unlocked</strong>
+      <span id="achText">You exist!</span>
+    </div>
+  </div>
+
+  <div class="card">
+
+    <!-- XP bar -->
+    <div class="xp-bar-wrap">
+      <div class="xp-label">
+        <span>LOGIN XP</span>
+        <span id="xpCount">0 / 100 XP</span>
+      </div>
+      <div class="xp-bar">
+        <div class="xp-fill" id="xpFill"></div>
+      </div>
+    </div>
+
+    <div class="logo-row">
+      <div class="pixel-icon">⚡</div>
+      <span class="title">PLAYER.ONE</span>
+    </div>
+    <p class="subtitle">authenticate to unlock your universe &nbsp;✦</p>
+
+    <!-- Form -->
+    <form id="loginForm" autocomplete="off">
+
+      <div class="field">
+        <label>
+          <span>// username</span>
+          <span class="field-status" id="userStatus">✓ VALID</span>
+        </label>
+        <div class="input-wrap">
+          <input type="text" id="username" placeholder="enter your gamer tag..." autocomplete="off" />
+          <span class="input-icon">👾</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>
+          <span>// passphrase</span>
+          <span class="field-status" id="passStatus">✓ VALID</span>
+        </label>
+        <div class="input-wrap">
+          <input type="password" id="password" placeholder="super secret stuff..." autocomplete="off" />
+          <span class="input-icon">🔐</span>
+        </div>
+        <div class="strength-bar">
+          <span id="s1"></span><span id="s2"></span><span id="s3"></span><span id="s4"></span>
+        </div>
+        <div class="strength-label" id="strengthLabel"></div>
+      </div>
+
+      <label class="remember-row">
+        <input type="checkbox" id="rememberMe" />
+        <div class="custom-check"><span class="check-mark">✓</span></div>
+        <span class="remember-text">keep me logged in (trust the vibes)</span>
+      </label>
+
+      <button type="submit" class="btn-login" id="loginBtn">
+        <span class="btn-text">🚀 &nbsp;ENTER THE VOID</span>
+        <div class="btn-loader"><div class="spinner"></div></div>
+      </button>
+
+    </form>
+
+    <div class="divider">or vibe with</div>
+
+    <div class="social-row">
+      <button class="btn-social" onclick="socialLogin('Google')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Google
+      </button>
+      <button class="btn-social" onclick="socialLogin('Discord')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#7289da"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+        Discord
+      </button>
+      <button class="btn-social" onclick="socialLogin('GitHub')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub
+      </button>
+    </div>
+
+    <p class="footer-text">no account? <a href="#" onclick="signupClick()">create one, bestie →</a></p>
+
+    <!-- Stats strip -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-val" id="statPlayers">2.4M</div>
+        <div class="stat-key">players</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="statOnline">8.2K</div>
+        <div class="stat-key">online</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="statLevel">99+</div>
+        <div class="stat-key">max lvl</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ---- Particles ----
+    const pContainer = document.getElementById('particles');
+    for (let i = 0; i < 30; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.cssText = `
+        left: ${Math.random() * 100}%;
+        animation-duration: ${6 + Math.random() * 10}s;
+        animation-delay: ${Math.random() * 12}s;
+        background: ${['#00f5ff','#bf00ff','#ff006e'][Math.floor(Math.random()*3)]};
+        width: ${1 + Math.random()*2}px;
+        height: ${1 + Math.random()*2}px;
+      `;
+      pContainer.appendChild(p);
+    }
+
+    // ---- XP system ----
+    let xp = 0;
+    const achievements = {
+      firstChar:  { icon: '⌨️',  text: 'Started typing — brave soul',   points: 10, shown: false },
+      validEmail: { icon: '📧',  text: 'Valid username — noice',          points: 20, shown: false },
+      strongPass: { icon: '🔒',  text: 'Strong password — we respect',   points: 30, shown: false },
+      rememberMe: { icon: '🧠',  text: 'Trust the vibes unlocked',       points: 10, shown: false },
+      signup:     { icon: '✨',  text: 'Curious about signup — legend',  points: 5,  shown: false },
+      social:     { icon: '🌐',  text: 'Social speedrun attempt',        points: 15, shown: false },
+    };
+
+    function addXP(key) {
+      const a = achievements[key];
+      if (!a || a.shown) return;
+      a.shown = true;
+      xp = Math.min(100, xp + a.points);
+      document.getElementById('xpFill').style.width = xp + '%';
+      document.getElementById('xpCount').textContent = xp + ' / 100 XP';
+      showAchievement(a.icon, a.text);
+      spawnXPPop('+' + a.points + ' XP');
+    }
+
+    function showAchievement(icon, text) {
+      const el = document.getElementById('achievement');
+      document.getElementById('achIcon').textContent = icon;
+      document.getElementById('achText').textContent = text;
+      el.classList.add('show');
+      clearTimeout(el._t);
+      el._t = setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
+    function spawnXPPop(label) {
+      const el = document.createElement('div');
+      el.className = 'xp-pop';
+      el.textContent = label;
+      el.style.cssText = `left:${20 + Math.random()*60}%;top:${30 + Math.random()*40}%;`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1300);
+    }
+
+    // ---- Username field ----
+    const usernameEl = document.getElementById('username');
+    let userTyped = false;
+    usernameEl.addEventListener('input', () => {
+      if (!userTyped && usernameEl.value.length > 0) {
+        userTyped = true;
+        addXP('firstChar');
+      }
+      const valid = usernameEl.value.length >= 3;
+      const status = document.getElementById('userStatus');
+      if (valid) {
+        usernameEl.classList.add('valid');
+        status.classList.add('visible');
+        addXP('validEmail');
+      } else {
+        usernameEl.classList.remove('valid');
+        status.classList.remove('visible');
+      }
+    });
+
+    // ---- Password field ----
+    const passwordEl = document.getElementById('password');
+    const bars = [document.getElementById('s1'), document.getElementById('s2'), document.getElementById('s3'), document.getElementById('s4')];
+    const strengthLabels = ['', '🧅 weak af', '🔥 mid tbh', '💪 decent', '🛡️ built different'];
+    let strongUnlocked = false;
+
+    passwordEl.addEventListener('input', () => {
+      const val = passwordEl.value;
+      let score = 0;
+      if (val.length >= 6)  score++;
+      if (val.length >= 10) score++;
+      if (/[^a-zA-Z0-9]/.test(val)) score++;
+      if (/[A-Z]/.test(val) && /[0-9]/.test(val)) score++;
+
+      bars.forEach((b, i) => {
+        b.className = '';
+        if (i < score) {
+          b.classList.add(score <= 1 ? 'active-1' : score <= 2 ? 'active-2' : 'active-3');
+        }
+      });
+      document.getElementById('strengthLabel').textContent = strengthLabels[score] || '';
+
+      const status = document.getElementById('passStatus');
+      if (score >= 3) {
+        passwordEl.classList.add('valid');
+        status.classList.add('visible');
+        if (!strongUnlocked) { strongUnlocked = true; addXP('strongPass'); }
+      } else {
+        passwordEl.classList.remove('valid');
+        status.classList.remove('visible');
+      }
+    });
+
+    // ---- Remember me ----
+    document.getElementById('rememberMe').addEventListener('change', (e) => {
+      if (e.target.checked) addXP('rememberMe');
+    });
+
+    // ---- Social login ----
+    function socialLogin(provider) {
+      addXP('social');
+      showAchievement('🌐', provider + ' speedrun — let\'s gooo');
+      spawnXPPop(provider + '!');
+    }
+
+    // ---- Signup link ----
+    function signupClick() {
+      addXP('signup');
+    }
+
+    // ---- Form submit ----
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('loginBtn');
+      btn.classList.add('loading');
+
+      await new Promise(r => setTimeout(r, 1800));
+
+      btn.classList.remove('loading');
+      const u = usernameEl.value.trim();
+      const p = passwordEl.value;
+
+      if (u.length < 3 || p.length < 4) {
+        showAchievement('😬', 'Fill it in properly bestie');
+        btn.style.background = 'linear-gradient(135deg, #ff006e, #ff4444)';
+        setTimeout(() => btn.style.background = '', 1000);
+        return;
+      }
+
+      xp = 100;
+      document.getElementById('xpFill').style.width = '100%';
+      document.getElementById('xpCount').textContent = '100 / 100 XP';
+      showAchievement('🎉', 'GG EZ — you\'re in bestie!');
+      spawnXPPop('LEVEL UP!');
+      btn.textContent = '✅ AUTHENTICATED';
+      btn.style.background = 'linear-gradient(135deg, #39ff14, #00f5ff)';
+    });
+
+    // ---- Konami easter egg ----
+    const konami = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    let konamiIdx = 0;
+    document.addEventListener('keydown', (e) => {
+      if (e.key === konami[konamiIdx]) {
+        konamiIdx++;
+        if (konamiIdx === konami.length) {
+          konamiIdx = 0;
+          showAchievement('🕹️', 'Konami Code — no cap, you\'re a legend');
+          spawnXPPop('SECRET +50 XP');
+          xp = Math.min(100, xp + 50);
+          document.getElementById('xpFill').style.width = xp + '%';
+          document.getElementById('xpCount').textContent = xp + ' / 100 XP';
+        }
+      } else {
+        konamiIdx = 0;
+      }
+    });
+  </script>
+</body>
+</html>
